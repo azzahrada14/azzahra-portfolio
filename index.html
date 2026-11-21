@@ -1053,18 +1053,23 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    document.querySelectorAll(".gallery-open").forEach(button => {
-        button.addEventListener("click", function () {
-            const galleryName = button.dataset.gallery;
-            const gallery = document.querySelector(
-                '[data-gallery-group="' + galleryName + '"]'
-            );
+  document.querySelectorAll(".gallery-open").forEach(button => {
+    button.addEventListener("click", function (event) {
+        event.preventDefault();
 
-            if (!gallery) return;
+        const galleryName = button.dataset.gallery;
 
-            openLightbox(Array.from(gallery.querySelectorAll("img")), 0);
-        });
+        const gallery = document.querySelector(
+            `.hidden-gallery[data-gallery-group="${galleryName}"]`
+        );
+
+        if (!gallery) return;
+
+        const images = Array.from(gallery.querySelectorAll("img"));
+
+        openLightbox(images, 0);
     });
+});
 
     closeButton.addEventListener("click", closeLightbox);
     prevButton.addEventListener("click", showPreviousImage);

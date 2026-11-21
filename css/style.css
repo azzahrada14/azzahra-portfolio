@@ -2731,4 +2731,17 @@ a {
         opacity: 1;
         transform: none;
     }
+    /* =========================================
+   HIDDEN DESIGN GALLERY
+========================================= */
+
+.hidden-gallery {
+    display: none !important;
+    visibility: hidden;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    position: absolute;
+    pointer-events: none;
+}
 }
