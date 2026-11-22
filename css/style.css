@@ -2019,17 +2019,16 @@ a {
     right: 25px;
 }
 
-/* =========================================================
-   23. SCROLL REVEAL
-========================================================= */
+
+
+/* =====================================
+   SCROLL REVEAL ANIMATION
+===================================== */
 
 .reveal {
     opacity: 0;
     transform: translateY(35px);
-
-    transition:
-        opacity .8s cubic-bezier(.2, .8, .2, 1),
-        transform .8s cubic-bezier(.2, .8, .2, 1);
+    transition: opacity 0.7s ease, transform 0.7s ease;
 }
 
 .reveal.visible {
@@ -2037,15 +2036,34 @@ a {
     transform: translateY(0);
 }
 
-.project-card.reveal,
-.skill-card.reveal,
-.certificate-card.reveal {
-    transition:
-        opacity .7s ease,
-        transform .45s cubic-bezier(.2, .8, .2, 1),
-        box-shadow .35s ease,
-        border-color .35s ease;
+@media (prefers-reduced-motion: reduce) {
+    .reveal {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
 }
+
+/* Tablet & Mobile */
+@media (max-width: 820px) {
+    .reveal {
+        transition:
+            opacity 0.5s ease,
+            transform 0.5s ease;
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .reveal,
+    .reveal.visible {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+        will-change: auto;
+    }
+}
+
 
 /* =========================================================
    24. TABLET
@@ -2731,17 +2749,86 @@ a {
         opacity: 1;
         transform: none;
     }
-    /* =========================================
-   HIDDEN DESIGN GALLERY
+}
+
+/* =========================================
+   29. HIDDEN DESIGN GALLERY
 ========================================= */
 
 .hidden-gallery {
     display: none !important;
-    visibility: hidden;
-    width: 0;
-    height: 0;
-    overflow: hidden;
-    position: absolute;
-    pointer-events: none;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    pointer-events: none !important;
 }
+/* =========================================
+   HIDDEN GALLERY
+========================================= */
+
+.hidden-gallery {
+    display: none !important;
+}
+
+/* =====================================
+   MOBILE REVEAL FIX
+===================================== */
+
+@media (max-width: 820px) {
+
+    .reveal {
+        transition:
+            opacity 0.5s ease,
+            transform 0.5s ease;
+    }
+
+    .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+
+    .reveal {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+}
+
+/* =====================================
+   HERO TYPING ANIMATION
+===================================== */
+
+.typing-name {
+    display: inline;
+}
+
+.typing-cursor {
+    display: inline-block;
+    margin-left: 2px;
+    color: var(--primary);
+    font-weight: 400;
+    animation: typingBlink 0.8s infinite;
+}
+
+@keyframes typingBlink {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .typing-cursor {
+        animation: none;
+    }
 }
