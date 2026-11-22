@@ -134,104 +134,83 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    /* =====================================================
-       3. HERO TYPING ANIMATION
-       Safari iOS Friendly
-    ===================================================== */
+    
+// =====================================
+// 3. HERO TYPING ANIMATION
+// =====================================
 
-    function initializeTypingAnimation() {
+function initializeTypingAnimation() {
+    const introElement = document.querySelector(".typing-intro");
+    const nameElement = document.querySelector(".typing-name");
 
-        const nameElement = document.querySelector(".typing-name");
+    if (!introElement || !nameElement) return;
 
-        if (!nameElement) return;
+    const introText = "Hi, I'm ";
+    const nameText = "Azzahra Dwi Aryati";
 
-        const fullText = "Hi, I'm Azzahra Dwi Aryati";
+    const typingSpeed = 100;
+    const deletingSpeed = 45;
+    const pauseAfterTyping = 2500;
+    const pauseAfterDeleting = 500;
 
-        const typingSpeed = 100;
-        const deletingSpeed = 45;
-        const pauseAfterTyping = 2500;
-        const pauseAfterDeleting = 500;
+    const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+    ).matches;
 
-        const reduceMotion = window.matchMedia(
-            "(prefers-reduced-motion: reduce)"
-        ).matches;
+    if (prefersReducedMotion) {
+        introElement.textContent = introText;
+        nameElement.textContent = nameText;
+        return;
+    }
 
-        if (reduceMotion) {
-            nameElement.textContent = fullText;
+    let index = 0;
+    let isDeleting = false;
+    let timer = null;
+
+    function typeEffect() {
+        if (document.hidden) {
+            timer = setTimeout(typeEffect, 500);
             return;
         }
 
-        let index = 0;
-        let isDeleting = false;
-        let typingTimer = null;
+        const fullText = introText + nameText;
 
-        function typeEffect() {
-
-            if (document.hidden) {
-                typingTimer = setTimeout(typeEffect, 500);
-                return;
-            }
-
-            if (!isDeleting) {
-
-                index++;
-
-                nameElement.textContent = fullText.substring(0, index);
-
-                if (index >= fullText.length) {
-                    isDeleting = true;
-
-                    typingTimer = setTimeout(
-                        typeEffect,
-                        pauseAfterTyping
-                    );
-
-                    return;
-                }
-
-                typingTimer = setTimeout(typeEffect, typingSpeed);
-
-            } else {
-
-                index--;
-
-                nameElement.textContent = fullText.substring(0, index);
-
-                if (index <= 0) {
-                    isDeleting = false;
-
-                    typingTimer = setTimeout(
-                        typeEffect,
-                        pauseAfterDeleting
-                    );
-
-                    return;
-                }
-
-                typingTimer = setTimeout(typeEffect, deletingSpeed);
-            }
+        if (!isDeleting) {
+            index++;
+        } else {
+            index--;
         }
 
-        function startTyping() {
-            if (typingTimer) {
-                clearTimeout(typingTimer);
-            }
+        introElement.textContent = fullText.substring(0, Math.min(index, introText.length));
+        nameElement.textContent = index > introText.length
+            ? fullText.substring(introText.length, index)
+            : "";
 
-            typingTimer = setTimeout(typeEffect, 500);
+        if (!isDeleting && index >= fullText.length) {
+            isDeleting = true;
+            timer = setTimeout(typeEffect, pauseAfterTyping);
+            return;
         }
 
-        document.addEventListener("visibilitychange", function () {
-            if (!document.hidden && !typingTimer) {
-                startTyping();
-            }
-        });
+        if (isDeleting && index <= 0) {
+            isDeleting = false;
+            timer = setTimeout(typeEffect, pauseAfterDeleting);
+            return;
+        }
 
-        nameElement.textContent = "";
-        startTyping();
+        timer = setTimeout(
+            typeEffect,
+            isDeleting ? deletingSpeed : typingSpeed
+        );
     }
 
-    initializeTypingAnimation();
+    introElement.textContent = "";
+    nameElement.textContent = "";
 
+    timer = setTimeout(typeEffect, 500);
+}
+
+initializeTypingAnimation();
 
     /* =====================================================
        4. PRELOADER
@@ -280,70 +259,48 @@ document.addEventListener("DOMContentLoaded", function () {
     updateHeader();
 
 
-    /* =====================================================
-       6. SCROLL REVEAL
-       Desktop + Android + Safari iPhone
-    ===================================================== */
+    // =====================================
+// 6. SCROLL REVEAL
+// =====================================
 
-    const revealElements = document.querySelectorAll(".reveal");
+const revealElements = document.querySelectorAll(".reveal");
 
-    const reduceMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-    ).matches;
+const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+).matches;
 
-    function showAllRevealElements() {
-        revealElements.forEach(function (element) {
-            element.classList.add("visible");
-        });
-    }
+function showAllRevealElements() {
+    revealElements.forEach(function (element) {
+        element.classList.add("visible");
+    });
+}
 
-    if (
-        reduceMotion ||
-        !("IntersectionObserver" in window)
-    ) {
-        showAllRevealElements();
+// Jika pengguna memilih mengurangi animasi
+// atau browser tidak mendukung IntersectionObserver
+if (prefersReducedMotion || !("IntersectionObserver" in window)) {
+    showAllRevealElements();
+} else {
+    const revealObserver = new IntersectionObserver(
+        function (entries, observer) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("visible");
 
-    } else {
-
-        const revealObserver = new IntersectionObserver(
-            function (entries, observer) {
-
-                entries.forEach(function (entry) {
-
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add("visible");
-                        observer.unobserve(entry.target);
-                    }
-
-                });
-
-            },
-            {
-                threshold: 0.01,
-                rootMargin: "0px 0px 100px 0px"
-            }
-        );
-
-        revealElements.forEach(function (element) {
-            revealObserver.observe(element);
-        });
-
-        // Periksa kembali ketika Safari memulihkan halaman.
-        window.addEventListener("pageshow", function () {
-
-            revealElements.forEach(function (element) {
-
-                const rect = element.getBoundingClientRect();
-
-                if (rect.top < window.innerHeight + 100) {
-                    element.classList.add("visible");
+                    // Animasi cukup dijalankan satu kali
+                    observer.unobserve(entry.target);
                 }
-
             });
+        },
+        {
+            threshold: 0.1,
+            rootMargin: "0px 0px -30px 0px"
+        }
+    );
 
-        });
-
-    }
+    revealElements.forEach(function (element) {
+        revealObserver.observe(element);
+    });
+}
 
 
     /* =====================================================
