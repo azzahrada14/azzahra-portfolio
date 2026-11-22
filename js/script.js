@@ -1,627 +1,657 @@
 
 /* =========================================================
    AZZAHRA DWI ARYATI — PROFESSIONAL PORTFOLIO
-   Modern | Responsive | Interactive | Light & Dark Mode
+   Responsive | Safari iOS Friendly | Interactive
 ========================================================= */
 
-/* =========================================================
-   1. THEME SWITCHER
-========================================================= */
+document.addEventListener("DOMContentLoaded", function () {
 
-const themeToggle = document.getElementById("themeToggle");
-const htmlElement = document.documentElement;
+    "use strict";
 
-function setTheme(theme) {
-    htmlElement.setAttribute("data-theme", theme);
+    /* =====================================================
+       1. THEME SWITCHER
+    ===================================================== */
+
+    const htmlElement = document.documentElement;
+    const themeToggle = document.getElementById("themeToggle");
+
+    function updateThemeIcon() {
+        if (!themeToggle) return;
+
+        const currentTheme = htmlElement.getAttribute("data-theme");
+
+        if (currentTheme === "dark") {
+            themeToggle.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.9 13A9 9 0 0 1 11 3.1
+                    9 9 0 1 0 20.9 13Z"/>
+                </svg>
+            `;
+            themeToggle.setAttribute("aria-label", "Aktifkan light mode");
+        } else {
+            themeToggle.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round">
+                    <circle cx="12" cy="12" r="4"/>
+                    <path d="M12 2v2m0 16v2
+                    M4.93 4.93l1.42 1.42
+                    m11.3 11.3 1.42 1.42
+                    M2 12h2m16 0h2
+                    M4.93 19.07l1.42-1.42
+                    m11.3-11.3 1.42-1.42"/>
+                </svg>
+            `;
+            themeToggle.setAttribute("aria-label", "Aktifkan dark mode");
+        }
+    }
+
+    function setTheme(theme) {
+        htmlElement.setAttribute("data-theme", theme);
+
+        try {
+            localStorage.setItem("portfolio-theme", theme);
+        } catch (error) {
+            // Tetap gunakan tema meskipun penyimpanan tidak tersedia.
+        }
+
+        updateThemeIcon();
+    }
+
+    let savedTheme = "light";
 
     try {
-        localStorage.setItem("portfolio-theme", theme);
+        savedTheme = localStorage.getItem("portfolio-theme") || "light";
     } catch (error) {
-        console.warn("Theme preference could not be saved.");
+        savedTheme = "light";
     }
 
-    updateThemeIcon();
-}
+    setTheme(savedTheme === "dark" ? "dark" : "light");
 
-function updateThemeIcon() {
-    if (!themeToggle) return;
+    if (themeToggle) {
+        themeToggle.addEventListener("click", function () {
+            const currentTheme = htmlElement.getAttribute("data-theme");
 
-    const currentTheme = htmlElement.getAttribute("data-theme");
+            setTheme(currentTheme === "dark" ? "light" : "dark");
+        });
+    }
 
-    if (currentTheme === "dark") {
-        themeToggle.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="1.8"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20.9 13A9 9 0 0 1 11 3.1
-                9 9 0 1 0 20.9 13Z"/>
-            </svg>
-        `;
-        themeToggle.setAttribute("aria-label", "Aktifkan light mode");
+
+    /* =====================================================
+       2. MOBILE NAVIGATION
+    ===================================================== */
+
+    const menuToggle = document.getElementById("menuToggle");
+    const navMenu = document.getElementById("navMenu");
+
+    function closeMobileMenu() {
+        if (!menuToggle || !navMenu) return;
+
+        navMenu.classList.remove("show");
+        menuToggle.classList.remove("active");
+        menuToggle.setAttribute("aria-expanded", "false");
+    }
+
+    if (menuToggle && navMenu) {
+
+        menuToggle.setAttribute("aria-expanded", "false");
+
+        menuToggle.addEventListener("click", function (event) {
+            event.stopPropagation();
+
+            const isOpen = navMenu.classList.toggle("show");
+
+            menuToggle.classList.toggle("active", isOpen);
+            menuToggle.setAttribute("aria-expanded", String(isOpen));
+        });
+
+        navMenu.querySelectorAll(".nav-link").forEach(function (link) {
+            link.addEventListener("click", closeMobileMenu);
+        });
+
+        document.addEventListener("click", function (event) {
+            if (
+                !navMenu.contains(event.target) &&
+                !menuToggle.contains(event.target)
+            ) {
+                closeMobileMenu();
+            }
+        });
+
+        window.addEventListener("resize", function () {
+            if (window.innerWidth > 820) {
+                closeMobileMenu();
+            }
+        });
+
+        window.addEventListener("pageshow", function () {
+            if (window.innerWidth > 820) {
+                closeMobileMenu();
+            }
+        });
+    }
+
+
+    /* =====================================================
+       3. HERO TYPING ANIMATION
+       Safari iOS Friendly
+    ===================================================== */
+
+    function initializeTypingAnimation() {
+
+        const nameElement = document.querySelector(".typing-name");
+
+        if (!nameElement) return;
+
+        const fullText = "Hi, I'm Azzahra Dwi Aryati";
+
+        const typingSpeed = 100;
+        const deletingSpeed = 45;
+        const pauseAfterTyping = 2500;
+        const pauseAfterDeleting = 500;
+
+        const reduceMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches;
+
+        if (reduceMotion) {
+            nameElement.textContent = fullText;
+            return;
+        }
+
+        let index = 0;
+        let isDeleting = false;
+        let typingTimer = null;
+
+        function typeEffect() {
+
+            if (document.hidden) {
+                typingTimer = setTimeout(typeEffect, 500);
+                return;
+            }
+
+            if (!isDeleting) {
+
+                index++;
+
+                nameElement.textContent = fullText.substring(0, index);
+
+                if (index >= fullText.length) {
+                    isDeleting = true;
+
+                    typingTimer = setTimeout(
+                        typeEffect,
+                        pauseAfterTyping
+                    );
+
+                    return;
+                }
+
+                typingTimer = setTimeout(typeEffect, typingSpeed);
+
+            } else {
+
+                index--;
+
+                nameElement.textContent = fullText.substring(0, index);
+
+                if (index <= 0) {
+                    isDeleting = false;
+
+                    typingTimer = setTimeout(
+                        typeEffect,
+                        pauseAfterDeleting
+                    );
+
+                    return;
+                }
+
+                typingTimer = setTimeout(typeEffect, deletingSpeed);
+            }
+        }
+
+        function startTyping() {
+            if (typingTimer) {
+                clearTimeout(typingTimer);
+            }
+
+            typingTimer = setTimeout(typeEffect, 500);
+        }
+
+        document.addEventListener("visibilitychange", function () {
+            if (!document.hidden && !typingTimer) {
+                startTyping();
+            }
+        });
+
+        nameElement.textContent = "";
+        startTyping();
+    }
+
+    initializeTypingAnimation();
+
+
+    /* =====================================================
+       4. PRELOADER
+    ===================================================== */
+
+    const preloader = document.getElementById("preloader");
+
+    function hidePreloader() {
+        if (!preloader) return;
+
+        preloader.classList.add("loaded");
+    }
+
+    if (document.readyState === "complete") {
+        setTimeout(hidePreloader, 350);
     } else {
-        themeToggle.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="1.8"
-                stroke-linecap="round">
-                <circle cx="12" cy="12" r="4"/>
-                <path d="M12 2v2m0 16v2
-                M4.93 4.93l1.42 1.42
-                m11.3 11.3 1.42 1.42
-                M2 12h2m16 0h2
-                M4.93 19.07l1.42-1.42
-                m11.3-11.3 1.42-1.42"/>
-            </svg>
-        `;
-        themeToggle.setAttribute("aria-label", "Aktifkan dark mode");
+        window.addEventListener("load", function () {
+            setTimeout(hidePreloader, 350);
+        }, { once: true });
     }
-}
 
-// Ambil tema yang tersimpan
-let savedTheme = "light";
-
-try {
-    savedTheme = localStorage.getItem("portfolio-theme") || "light";
-} catch (error) {
-    savedTheme = "light";
-}
-
-setTheme(savedTheme === "dark" ? "dark" : "light");
-
-// Klik tombol tema
-if (themeToggle) {
-    themeToggle.addEventListener("click", () => {
-        const currentTheme = htmlElement.getAttribute("data-theme");
-        setTheme(currentTheme === "dark" ? "light" : "dark");
-    });
-}
-
-/* =========================================================
-   2. MOBILE NAVIGATION
-========================================================= */
-
-const menuToggle = document.getElementById("menuToggle");
-const navMenu = document.getElementById("navMenu");
-
-function closeMobileMenu() {
-    if (!menuToggle || !navMenu) return;
-
-    navMenu.classList.remove("show");
-    menuToggle.classList.remove("active");
-    menuToggle.setAttribute("aria-expanded", "false");
-}
-
-if (menuToggle && navMenu) {
-
-    menuToggle.addEventListener("click", () => {
-        const isOpen = navMenu.classList.toggle("show");
-
-        menuToggle.classList.toggle("active", isOpen);
-        menuToggle.setAttribute("aria-expanded", String(isOpen));
+    // Fallback agar preloader tidak tertinggal.
+    window.addEventListener("pageshow", function () {
+        setTimeout(hidePreloader, 350);
     });
 
-    // Tutup menu ketika link diklik
-    navMenu.querySelectorAll(".nav-link").forEach(link => {
-        link.addEventListener("click", closeMobileMenu);
+
+    /* =====================================================
+       5. STICKY HEADER
+    ===================================================== */
+
+    const header = document.getElementById("header");
+
+    function updateHeader() {
+        if (!header) return;
+
+        header.classList.toggle("scrolled", window.scrollY > 40);
+    }
+
+    window.addEventListener("scroll", updateHeader, {
+        passive: true
     });
 
-    // Tutup menu ketika klik di luar navigasi
-    document.addEventListener("click", event => {
-        const clickedInside =
-            navMenu.contains(event.target) ||
-            menuToggle.contains(event.target);
+    window.addEventListener("pageshow", updateHeader);
 
-        if (!clickedInside) {
-            closeMobileMenu();
-        }
-    });
+    updateHeader();
 
-    // Tutup menu saat kembali ke desktop
-    window.addEventListener("resize", () => {
-        if (window.innerWidth > 820) {
-            closeMobileMenu();
-        }
-    });
-}
 
-/* =========================================================
-   3. HERO TYPING ANIMATION
-   "Hi, I'm Azzahra Dwi Aryati"
-========================================================= */
+    /* =====================================================
+       6. SCROLL REVEAL
+       Desktop + Android + Safari iPhone
+    ===================================================== */
 
-function initializeTypingAnimation() {
-
-    const introElement = document.querySelector(".typing-intro");
-    const nameElement = document.querySelector(".typing-name");
-
-    if (!nameElement) return;
-
-    const introText = "Hi, I'm ";
-    const nameText = "Azzahra Dwi Aryati";
-
-    const typingSpeed = 110;
-    const restartDelay = 3000;
+    const revealElements = document.querySelectorAll(".reveal");
 
     const reduceMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"
     ).matches;
 
-    // Jika pengguna mengurangi animasi
-    if (reduceMotion) {
-        if (introElement) {
-            introElement.textContent = introText;
-        }
-
-        nameElement.textContent = nameText;
-        return;
+    function showAllRevealElements() {
+        revealElements.forEach(function (element) {
+            element.classList.add("visible");
+        });
     }
 
-    let introIndex = 0;
-    let nameIndex = 0;
+    if (
+        reduceMotion ||
+        !("IntersectionObserver" in window)
+    ) {
+        showAllRevealElements();
 
-    if (introElement) {
-        introElement.textContent = "";
-    }
+    } else {
 
-    nameElement.textContent = "";
+        const revealObserver = new IntersectionObserver(
+            function (entries, observer) {
 
-    // Mengetik "Hi, I'm"
-    function typeIntro() {
+                entries.forEach(function (entry) {
 
-        if (!introElement) {
-            typeName();
-            return;
-        }
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("visible");
+                        observer.unobserve(entry.target);
+                    }
 
-        if (introIndex < introText.length) {
+                });
 
-            introElement.textContent += introText.charAt(introIndex);
+            },
+            {
+                threshold: 0.01,
+                rootMargin: "0px 0px 100px 0px"
+            }
+        );
 
-            introIndex++;
+        revealElements.forEach(function (element) {
+            revealObserver.observe(element);
+        });
 
-            setTimeout(typeIntro, typingSpeed);
+        // Periksa kembali ketika Safari memulihkan halaman.
+        window.addEventListener("pageshow", function () {
 
-        } else {
+            revealElements.forEach(function (element) {
 
-            setTimeout(typeName, 150);
+                const rect = element.getBoundingClientRect();
 
-        }
-    }
-
-    // Mengetik nama
-    function typeName() {
-
-        if (nameIndex < nameText.length) {
-
-            nameElement.textContent += nameText.charAt(nameIndex);
-
-            nameIndex++;
-
-            setTimeout(typeName, typingSpeed);
-
-        } else {
-
-            // Tunggu sebelum animasi diulang
-            setTimeout(resetTyping, restartDelay);
-
-        }
-    }
-
-    // Mengulang animasi
-    function resetTyping() {
-
-        if (introElement) {
-            introElement.textContent = "";
-        }
-
-        nameElement.textContent = "";
-
-        introIndex = 0;
-        nameIndex = 0;
-
-        typeIntro();
-    }
-
-    // Mulai animasi
-    setTimeout(typeIntro, 500);
-}
-
-initializeTypingAnimation();
-
-/* =========================================================
-   4. PRELOADER
-========================================================= */
-
-const preloader = document.getElementById("preloader");
-
-function hidePreloader() {
-
-    if (!preloader) return;
-
-    setTimeout(() => {
-        preloader.classList.add("loaded");
-    }, 350);
-}
-
-// Pastikan preloader tidak tertinggal
-if (document.readyState === "complete") {
-    hidePreloader();
-} else {
-    window.addEventListener("load", hidePreloader, { once: true });
-}
-
-/* =========================================================
-   5. STICKY HEADER
-========================================================= */
-
-const header = document.getElementById("header");
-
-function updateHeader() {
-
-    if (!header) return;
-
-    header.classList.toggle("scrolled", window.scrollY > 40);
-}
-
-window.addEventListener("scroll", updateHeader, { passive: true });
-
-updateHeader();
-
-/* =========================================================
-   6. SCROLL REVEAL
-   Desktop + Mobile
-========================================================= */
-
-const revealElements = document.querySelectorAll(".reveal");
-
-const reduceMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)"
-).matches;
-
-if (reduceMotion || !("IntersectionObserver" in window)) {
-
-    revealElements.forEach(element => {
-        element.classList.add("visible");
-    });
-
-} else {
-
-    const revealObserver = new IntersectionObserver(
-        (entries, observer) => {
-
-            entries.forEach(entry => {
-
-                if (entry.isIntersecting) {
-
-                    entry.target.classList.add("visible");
-
-                    observer.unobserve(entry.target);
+                if (rect.top < window.innerHeight + 100) {
+                    element.classList.add("visible");
                 }
 
             });
 
-        },
-        {
-            threshold: 0.05,
-            rootMargin: "0px 0px 120px 0px"
+        });
+
+    }
+
+
+    /* =====================================================
+       7. PROJECT FILTER
+    ===================================================== */
+
+    const filterButtons = document.querySelectorAll(".filter-btn");
+    const projectCards = document.querySelectorAll(".project-card");
+
+    filterButtons.forEach(function (button) {
+
+        button.addEventListener("click", function () {
+
+            filterButtons.forEach(function (item) {
+                item.classList.remove("active");
+            });
+
+            button.classList.add("active");
+
+            const selectedFilter = button.dataset.filter;
+
+            projectCards.forEach(function (card) {
+
+                const category = card.dataset.category;
+
+                const shouldShow =
+                    selectedFilter === "all" ||
+                    category === selectedFilter;
+
+                card.classList.toggle(
+                    "filter-hidden",
+                    !shouldShow
+                );
+
+            });
+
+        });
+
+    });
+
+
+    /* =====================================================
+       8. IMAGE LIGHTBOX
+    ===================================================== */
+
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImage = document.getElementById("lightboxImage");
+    const lightboxCaption = document.getElementById("lightboxCaption");
+    const lightboxCounter = document.getElementById("lightboxCounter");
+
+    const closeButton = document.getElementById("lightboxClose");
+    const prevButton = document.getElementById("lightboxPrev");
+    const nextButton = document.getElementById("lightboxNext");
+
+    let galleryImages = [];
+    let currentImageIndex = 0;
+
+    function updateLightbox() {
+
+        if (!lightboxImage || galleryImages.length === 0) return;
+
+        const currentImage = galleryImages[currentImageIndex];
+
+        lightboxImage.src = currentImage.currentSrc || currentImage.src;
+        lightboxImage.alt = currentImage.alt || "Project preview";
+
+        if (lightboxCaption) {
+            lightboxCaption.textContent = currentImage.alt || "";
         }
-    );
 
-    revealElements.forEach(element => {
-        revealObserver.observe(element);
-    });
-}
+        if (lightboxCounter) {
+            lightboxCounter.textContent =
+                `${currentImageIndex + 1} / ${galleryImages.length}`;
+        }
 
-/* =========================================================
-   7. PROJECT FILTER
-========================================================= */
+        if (prevButton) {
+            prevButton.style.display =
+                galleryImages.length > 1 ? "" : "none";
+        }
 
-const filterButtons = document.querySelectorAll(".filter-btn");
-const projectCards = document.querySelectorAll(".project-card");
-
-filterButtons.forEach(button => {
-
-    button.addEventListener("click", () => {
-
-        // Atur tombol aktif
-        filterButtons.forEach(item => {
-            item.classList.remove("active");
-        });
-
-        button.classList.add("active");
-
-        const selectedFilter = button.dataset.filter;
-
-        // Filter project
-        projectCards.forEach(card => {
-
-            const category = card.dataset.category;
-
-            const shouldShow =
-                selectedFilter === "all" ||
-                category === selectedFilter;
-
-            card.classList.toggle("filter-hidden", !shouldShow);
-        });
-
-    });
-
-});
-
-/* =========================================================
-   8. IMAGE LIGHTBOX
-========================================================= */
-
-const lightbox = document.getElementById("lightbox");
-const lightboxImage = document.getElementById("lightboxImage");
-const lightboxCaption = document.getElementById("lightboxCaption");
-const lightboxCounter = document.getElementById("lightboxCounter");
-
-const closeButton = document.getElementById("lightboxClose");
-const prevButton = document.getElementById("lightboxPrev");
-const nextButton = document.getElementById("lightboxNext");
-
-let galleryImages = [];
-let currentImageIndex = 0;
-
-// Update gambar lightbox
-function updateLightbox() {
-
-    if (!lightboxImage || galleryImages.length === 0) return;
-
-    const currentImage = galleryImages[currentImageIndex];
-
-    lightboxImage.src = currentImage.currentSrc || currentImage.src;
-    lightboxImage.alt = currentImage.alt || "Project preview";
-
-    if (lightboxCaption) {
-        lightboxCaption.textContent = currentImage.alt || "";
+        if (nextButton) {
+            nextButton.style.display =
+                galleryImages.length > 1 ? "" : "none";
+        }
     }
 
-    if (lightboxCounter) {
-        lightboxCounter.textContent =
-            `${currentImageIndex + 1} / ${galleryImages.length}`;
+    function openLightbox(images, index) {
+
+        if (!lightbox || !images || images.length === 0) return;
+
+        galleryImages = images;
+        currentImageIndex = index || 0;
+
+        updateLightbox();
+
+        lightbox.classList.add("active");
+        lightbox.setAttribute("aria-hidden", "false");
+
+        document.body.classList.add("lightbox-open");
     }
 
-    // Sembunyikan tombol navigasi jika hanya ada satu gambar
+    function closeLightbox() {
+
+        if (!lightbox) return;
+
+        lightbox.classList.remove("active");
+        lightbox.setAttribute("aria-hidden", "true");
+
+        document.body.classList.remove("lightbox-open");
+    }
+
+    function showNextImage() {
+
+        if (galleryImages.length === 0) return;
+
+        currentImageIndex =
+            (currentImageIndex + 1) % galleryImages.length;
+
+        updateLightbox();
+    }
+
+    function showPreviousImage() {
+
+        if (galleryImages.length === 0) return;
+
+        currentImageIndex =
+            (currentImageIndex - 1 + galleryImages.length) %
+            galleryImages.length;
+
+        updateLightbox();
+    }
+
+    const imageSelectors = [
+        ".project-images img",
+        ".device-gallery img",
+        ".phone-screen img",
+        ".creative-gallery img",
+        ".certificate-images img"
+    ].join(", ");
+
+    document.querySelectorAll(imageSelectors).forEach(function (image) {
+
+        image.style.cursor = "zoom-in";
+
+        image.addEventListener("click", function () {
+
+            const galleryContainer = image.closest(
+                ".project-images, .device-gallery, .phone-gallery, .creative-gallery, .certificate-images"
+            );
+
+            const images = galleryContainer
+                ? Array.from(galleryContainer.querySelectorAll("img"))
+                : [image];
+
+            openLightbox(images, images.indexOf(image));
+        });
+
+    });
+
+    // Galeri tambahan Aksesmu.
+    document.querySelectorAll(".gallery-open").forEach(function (button) {
+
+        button.addEventListener("click", function (event) {
+
+            event.preventDefault();
+
+            const galleryName = button.dataset.gallery;
+
+            const gallery = document.querySelector(
+                `.hidden-gallery[data-gallery-group="${galleryName}"]`
+            );
+
+            if (!gallery) return;
+
+            const images = Array.from(
+                gallery.querySelectorAll("img")
+            );
+
+            openLightbox(images, 0);
+        });
+
+    });
+
+    if (closeButton) {
+        closeButton.addEventListener("click", closeLightbox);
+    }
+
     if (prevButton) {
-        prevButton.style.display =
-            galleryImages.length > 1 ? "" : "none";
+        prevButton.addEventListener("click", showPreviousImage);
     }
 
     if (nextButton) {
-        nextButton.style.display =
-            galleryImages.length > 1 ? "" : "none";
+        nextButton.addEventListener("click", showNextImage);
     }
-}
 
-// Buka lightbox
-function openLightbox(images, index = 0) {
+    if (lightbox) {
 
-    if (!lightbox || images.length === 0) return;
+        lightbox.addEventListener("click", function (event) {
 
-    galleryImages = images;
-    currentImageIndex = index;
+            if (event.target === lightbox) {
+                closeLightbox();
+            }
 
-    updateLightbox();
+        });
 
-    lightbox.classList.add("active");
-    lightbox.setAttribute("aria-hidden", "false");
+    }
 
-    document.body.classList.add("lightbox-open");
-}
+    document.addEventListener("keydown", function (event) {
 
-// Tutup lightbox
-function closeLightbox() {
+        if (!lightbox || !lightbox.classList.contains("active")) return;
 
-    if (!lightbox) return;
+        if (event.key === "Escape") closeLightbox();
+        if (event.key === "ArrowRight") showNextImage();
+        if (event.key === "ArrowLeft") showPreviousImage();
 
-    lightbox.classList.remove("active");
-    lightbox.setAttribute("aria-hidden", "true");
+    });
 
-    document.body.classList.remove("lightbox-open");
-}
 
-// Gambar berikutnya
-function showNextImage() {
+    /* =====================================================
+       9. SCROLL PROGRESS
+    ===================================================== */
 
-    if (galleryImages.length === 0) return;
+    const scrollProgress = document.getElementById("scrollProgress");
 
-    currentImageIndex =
-        (currentImageIndex + 1) % galleryImages.length;
+    function updateScrollProgress() {
 
-    updateLightbox();
-}
+        if (!scrollProgress) return;
 
-// Gambar sebelumnya
-function showPreviousImage() {
+        const scrollTop = window.scrollY;
 
-    if (galleryImages.length === 0) return;
+        const documentHeight =
+            document.documentElement.scrollHeight - window.innerHeight;
 
-    currentImageIndex =
-        (currentImageIndex - 1 + galleryImages.length) %
-        galleryImages.length;
+        const progress = documentHeight > 0
+            ? Math.min(100, Math.max(0,
+                (scrollTop / documentHeight) * 100))
+            : 0;
 
-    updateLightbox();
-}
+        scrollProgress.style.width = progress + "%";
+    }
 
-// Klik gambar project untuk membuka lightbox
-const imageSelectors = [
-    ".project-images img",
-    ".device-gallery img",
-    ".phone-screen img",
-    ".creative-gallery img",
-    ".certificate-images img"
-].join(", ");
+    window.addEventListener("scroll", updateScrollProgress, {
+        passive: true
+    });
 
-document.querySelectorAll(imageSelectors).forEach(image => {
+    window.addEventListener("resize", updateScrollProgress);
+    window.addEventListener("pageshow", updateScrollProgress);
 
-    image.style.cursor = "zoom-in";
+    updateScrollProgress();
 
-    image.addEventListener("click", () => {
 
-        const galleryContainer = image.closest(
-            ".project-images, .device-gallery, .phone-gallery, .creative-gallery, .certificate-images"
+    /* =====================================================
+       10. ACTIVE NAVIGATION
+    ===================================================== */
+
+    const sections = document.querySelectorAll("main section[id]");
+    const navLinks = document.querySelectorAll(".nav-link");
+
+    if ("IntersectionObserver" in window) {
+
+        const sectionObserver = new IntersectionObserver(
+            function (entries) {
+
+                entries.forEach(function (entry) {
+
+                    if (entry.isIntersecting) {
+
+                        navLinks.forEach(function (link) {
+
+                            const isActive =
+                                link.getAttribute("href") ===
+                                "#" + entry.target.id;
+
+                            link.classList.toggle("active", isActive);
+                        });
+
+                    }
+
+                });
+
+            },
+            {
+                rootMargin: "-35% 0px -55% 0px"
+            }
         );
 
-        const images = galleryContainer
-            ? Array.from(galleryContainer.querySelectorAll("img"))
-            : [image];
+        sections.forEach(function (section) {
+            sectionObserver.observe(section);
+        });
 
-        openLightbox(images, images.indexOf(image));
-    });
-
-});
-
-// Galeri tambahan Aksesmu
-document.querySelectorAll(".gallery-open").forEach(button => {
-
-    button.addEventListener("click", event => {
-
-        event.preventDefault();
-
-        const galleryName = button.dataset.gallery;
-
-        const gallery = document.querySelector(
-            `.hidden-gallery[data-gallery-group="${galleryName}"]`
-        );
-
-        if (!gallery) return;
-
-        const images = Array.from(
-            gallery.querySelectorAll("img")
-        );
-
-        openLightbox(images, 0);
-    });
-
-});
-
-// Tombol lightbox
-if (closeButton) {
-    closeButton.addEventListener("click", closeLightbox);
-}
-
-if (prevButton) {
-    prevButton.addEventListener("click", showPreviousImage);
-}
-
-if (nextButton) {
-    nextButton.addEventListener("click", showNextImage);
-}
-
-// Klik area luar gambar untuk menutup
-if (lightbox) {
-
-    lightbox.addEventListener("click", event => {
-
-        if (event.target === lightbox) {
-            closeLightbox();
-        }
-
-    });
-}
-
-// Keyboard navigation
-document.addEventListener("keydown", event => {
-
-    if (!lightbox || !lightbox.classList.contains("active")) return;
-
-    if (event.key === "Escape") {
-        closeLightbox();
     }
 
-    if (event.key === "ArrowRight") {
-        showNextImage();
+
+    /* =====================================================
+       11. DYNAMIC FOOTER YEAR
+    ===================================================== */
+
+    const currentYear = document.getElementById("currentYear");
+
+    if (currentYear) {
+        currentYear.textContent = new Date().getFullYear();
     }
 
-    if (event.key === "ArrowLeft") {
-        showPreviousImage();
-    }
+
+    /* =====================================================
+       12. PAGE LOADED
+    ===================================================== */
+
+    document.body.classList.add("page-loaded");
 
 });
-
-/* =========================================================
-   9. SCROLL PROGRESS
-========================================================= */
-
-const scrollProgress = document.getElementById("scrollProgress");
-
-function updateScrollProgress() {
-
-    if (!scrollProgress) return;
-
-    const scrollTop = window.scrollY;
-
-    const documentHeight =
-        document.documentElement.scrollHeight - window.innerHeight;
-
-    const progress = documentHeight > 0
-        ? (scrollTop / documentHeight) * 100
-        : 0;
-
-    scrollProgress.style.width = `${progress}%`;
-}
-
-window.addEventListener("scroll", updateScrollProgress, {
-    passive: true
-});
-
-window.addEventListener("resize", updateScrollProgress);
-
-updateScrollProgress();
-
-/* =========================================================
-   10. ACTIVE NAVIGATION
-========================================================= */
-
-const sections = document.querySelectorAll("main section[id]");
-const navLinks = document.querySelectorAll(".nav-link");
-
-if ("IntersectionObserver" in window) {
-
-    const sectionObserver = new IntersectionObserver(
-        entries => {
-
-            entries.forEach(entry => {
-
-                if (entry.isIntersecting) {
-
-                    navLinks.forEach(link => {
-
-                        const isActive =
-                            link.getAttribute("href") ===
-                            `#${entry.target.id}`;
-
-                        link.classList.toggle("active", isActive);
-                    });
-
-                }
-
-            });
-
-        },
-        {
-            rootMargin: "-35% 0px -55% 0px"
-        }
-    );
-
-    sections.forEach(section => {
-        sectionObserver.observe(section);
-    });
-}
-
-/* =========================================================
-   11. DYNAMIC FOOTER YEAR
-========================================================= */
-
-const currentYear = document.getElementById("currentYear");
-
-if (currentYear) {
-    currentYear.textContent = new Date().getFullYear();
-}
-
-/* =========================================================
-   12. PAGE LOADED
-========================================================= */
-
-document.body.classList.add("page-loaded");
